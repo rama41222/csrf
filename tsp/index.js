@@ -2,7 +2,7 @@ const cookieParser = require('cookie-parser');
 const csrf = require('csurf');
 const bodyParser = require('body-parser');
 const express = require('express');
-const PORT = 3000;
+const PORT = 34222;
 const HOST = "0.0.0.0";
 const csrfProtection = csrf({ cookie: true })
 const parseForm = bodyParser.urlencoded({ extended: false })
@@ -16,9 +16,8 @@ app.get('/', csrfProtection, function (req, res) {
 });
 
 app.post('/process', parseForm, csrfProtection, function (req, res) {
-    console.log(req.body.mind);
-    console.log(req.body._csrf);
-    res.send('data is being processed')
+    res.render('secure', { mind: req.body.mind, csrf: req.body._csrf})
+    
 });
 
 app.listen(PORT, HOST, e => {
