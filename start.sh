@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 cd ./tsp
 npm run dev
 cd ..
