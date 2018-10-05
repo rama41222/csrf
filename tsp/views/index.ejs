@@ -3,13 +3,14 @@
 
 </head>
 <body>
-<form action="/process" method="POST">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    Whats on your mind ? <input type="text" name="mind">
-    <button type="submit">Submit</button>
-</form>
-<br>
-<p>Comment out the hidden csrf field...and try to submit</p>
+<section align="center" style="margin-top:40vh;">
+    <form action="/process" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        Whats on your mind ? <input type="text" name="mind">
+        <button type="submit">Submit</button>
+    </form>
+    <p>Comment out the hidden csrf field...and try to submit</p>
 
+</section>
 </body>
 </html>
