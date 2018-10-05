@@ -17,7 +17,6 @@ app.get('/', csrfProtection, function (req, res) {
 
 app.post('/process', parseForm, csrfProtection, function (req, res) {
     res.render('secure', { mind: req.body.mind, csrf: req.body._csrf})
-    
 });
 
 app.listen(PORT, HOST, e => {
