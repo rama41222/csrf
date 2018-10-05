@@ -1,0 +1,14 @@
+<html>
+<head>
+
+</head>
+<body>
+
+<form action="/process" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    Whats on your mind ? <input type="text" name="mind">
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>
