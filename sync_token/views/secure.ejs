@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to secure page</title>
+</head>
+<body>
+<section align="center" style="margin-top:30vh;">
+    <h1>Welcome to the Secure area</h1>
+    <div align="center">
+        <table>
+           <%if(typeof statuses !== 'undefined') {%>
+                <% for(var i=0; i < statuses.length; i++) { %>
+                    <tr>
+                        <td><%= statuses[i] %></td>
+                    </tr>
+                <% } %>
+            <%}%>
+        </table>
+    </div>
+    <hr/>
+    <h4>What are you thinking ?</h4>
+    <form action="/" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="text" name="status" placeholder="what are you thinking? ">
+        <button type="submit">Set Status</button>
+    </form>
+    <p>Comment out the hidden csrf field...and try to submit</p>
+
+    <div align="center">
+        <form action="/logout" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+</section>
+</body>
+</html>
