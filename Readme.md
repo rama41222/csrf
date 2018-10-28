@@ -1,17 +1,17 @@
-##### Install Dependancies
+##### Install Dependancies.
  
 ```
 sh install.sh
 ```
 
-##### Run Token Synchronizer pattern sample
+##### Run Token Synchronizer pattern sample.
  
 ```
 cd ./sync_token
 sh start.sh
 ```
 
-##### Run Double Submit Token pattern sample
+##### Run Double Submit Token pattern sample.
  
 ```
 cd ./double_submit
