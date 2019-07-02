@@ -15,70 +15,67 @@ let statusStorage = []
 app.set('view engine', 'ejs');
 app.use(cookieParser());
 
-app.get('/login', async function (req, res) {
-    const session = req.cookies['session'];
-    const csrf = customSessions[session]
-    if(session && customSessions[session]) {
-        return res.render('secure', { csrf, statusStorage });
+app.set('view engine', 'ejs');
+app.use(cookieParser());
+
+app.use(function (req, res, next) {
+    req.sessionFromHeader = req.cookies['session'];
+    req.csrf = req.cookies['csrf'];
+    req.isSecure = req.cookies['session'] && req.cookies['csrf'];
+});
+
+app.get('/login', function (req, res) {
+    if(req.isSecure) {
+        const statuses = getStatuses(sessionFromHeader);
+        return res.render('secure', { csrf: req.csrf, statuses });
     }
-    res.render('index')
+    res.render('index');
 });
 
 app.get('/', function (req, res) {
-    const session = req.cookies['session'];
-    const csrf = customSessions[session]
-    if(session && customSessions[session]) {
-        res.render('secure', { csrf, statusStorage });
-    } else {
-        res.redirect('/login')
+    if(req.isSecure) {
+        const statuses = getStatuses(session);
+        return res.render('secure', { csrf: req.csrf, statuses });
     }
+    res.redirect('/login');
 });
 
 app.post('/process', parseForm, async function (req, res) {
     const user = req.body.username;
     const password = req.body.password;
+
     if(user === 'admin' && password === 'admin') {
         const session = await createCSPRSG();
         const csrf = await createCSRF();
-        customSessions[session] = csrf;
-        const statuses = await getStatuses(session);
-        res.setHeader('Set-Cookie',[`session=${session}; expires=${new Date().addDays(10).toUTCString()};samesite=strict;`]);
+        // customSessions[session] = csrf;
+        const statuses = getStatuses(session);
+        res.setHeader('Set-Cookie',[`session=${session}; expires=${new Date().addDays(10).toUTCString()};samesite=strict;HttpOnly;`,
+            `csrf=${csrf}; expires=${new Date().addDays(10).toUTCString()};samesite=strict;HttpOnly;`]);
         res.render('secure', { csrf, statuses })
     } else {
         res.redirect('/login')
     }
 });
 
-app.get('/exchange', async function (req, res) {
-    const session = req.cookies['session'];
-    if(session && customSessions[session]) {
-        res.status(200).json({ _csrf: customSessions[session]});
-    } else {
-        res.status(400).send()
-    }
-});
 
 app.post('/', parseForm, async function (req, res) {
-    const session = req.cookies['session'];
+    const sessionFromHeader = req.cookies['session'];
+    const csrfFromHeader = req.cookies['csrf'];
     const csrf = req.body._csrf;
     const status = req.body.status;
-    if(session && customSessions[session] === csrf) {
-        statusStorage.push({session: session, status: status});
-        const statuses = await getStatuses(session);
-        res.render('secure', { csrf, statuses})
+    if(csrf && sessionFromHeader && csrfFromHeader && csrfFromHeader === csrf) {
+        statusStorage.push({session: sessionFromHeader, status: status});
+        const statuses = await getStatuses(sessionFromHeader);
+        res.render('secure', { csrf, statuses })
     } else {
         res.redirect('/login')
     }
 });
 
 app.post('/logout', parseForm, async function (req, res) {
-    const session = req.cookies['session'];
-    if(session && customSessions[session]) {
-        delete customSessions[session]
-        res.redirect('/login')
-    } else {
-        res.redirect('/login')
-    }
+    res.clearCookie("session");
+    res.clearCookie("csrf");
+    res.redirect('/login');
 });
 
 app.get('/logout', parseForm, async function (req, res) {
@@ -93,14 +90,8 @@ async function createCSRF() {
     return uuidv4();
 }
 
-async function getStatuses(session) {
-    let statusMesseges = []
-    statusStorage.filter( s => {
-         if(s.session === session){
-             statusMesseges.push(s.status);
-         }
-    });
-    return statusMesseges;
+function getStatuses(session) {
+    return statusStorage.filter( s => s.session === session);
 }
 
 Date.prototype.addDays = function(days) {
